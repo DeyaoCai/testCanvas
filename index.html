@@ -1,0 +1,76 @@
+<canvas class="wave" width="360" height="360"/>
+<script>
+const el = document.querySelector('canvas');
+el.onclick = function(ev){
+  const posi = getEventPosition(ev);
+  const res = draw(posi, true);
+  console.log(posi, res, `你点击了${`中上右下左`[res]}`);
+}
+function getEventPosition(ev){
+  var x, y;
+  if (ev.layerX || ev.layerX == 0) {
+    x = ev.layerX;
+    y = ev.layerY;
+  } else if (ev.offsetX || ev.offsetX == 0) { // Opera
+    x = ev.offsetX;
+    y = ev.offsetY;
+  }
+  return [x, y];
+}
+
+const ctx = el.getContext('2d');
+ctx.save();
+
+function draw(posi, shallReturnClickPosition){
+  // 重新绘制时 还原画布
+  shallReturnClickPosition || ctx.restore();
+  let ret = -1;
+  // 颜色
+  const colors = ['red', 'green', 'yellow', 'orange', 'black'];
+  const lists = [
+    // // 中间
+    [
+      [120, 120], [120, 240], [240, 240], [240, 120], [120, 120],
+    ],
+    // 上
+    [
+      [0,0], [360, 0], [240, 120], [120, 120], [0,0],
+    ],
+    // 右
+    [
+      [360, 0], [360, 360], [240, 240], [240, 120], [360, 0],
+    ],
+    // // 下
+    [
+      [360, 360], [0, 360], [120, 240], [240, 240], [360, 360],
+    ],
+    // // 左
+    [
+      [0, 360], [0, 0], [120, 120], [120, 240], [0, 360],
+    ],
+  ];
+  lists.forEach((item, index) => {
+    const res = drawT(item, colors[index]);
+    if (res){ret = index;};
+  });
+  return ret;
+
+  function drawT(points, color) {
+    if (shallReturnClickPosition) ctx.restore();
+    const pot = [...points];
+    ctx.beginPath();
+    ctx.moveTo.apply(ctx, pot.shift());
+    points.forEach(item => {
+      ctx.lineTo.apply(ctx, item);
+    });
+    ctx.closePath();
+    if (shallReturnClickPosition) {
+      if (ctx.isPointInPath.apply(ctx, posi)) return true;
+    } else {
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+  }
+}
+draw([0, 0], false);
+</script>
